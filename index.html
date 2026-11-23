@@ -810,6 +810,46 @@
     });
   }
 
+  var FOTO_DB_NAME = "olympiapark-fotos-v1";
+  var FOTO_STORE = "fotos";
+  var fotoDbPromise = null;
+
+  function oeffneFotoDb() {
+    if (fotoDbPromise) return fotoDbPromise;
+    fotoDbPromise = new Promise(function(resolve) {
+      if (!window.indexedDB) { resolve(null); return; }
+      try {
+        var req = indexedDB.open(FOTO_DB_NAME, 1);
+        req.onupgradeneeded = function() { req.result.createObjectStore(FOTO_STORE); };
+        req.onsuccess = function() { resolve(req.result); };
+        req.onerror = function() { resolve(null); };
+      } catch (e) { resolve(null); }
+    });
+    return fotoDbPromise;
+  }
+
+  // Originalfoto in voller Qualität ablegen (localStorage speichert nur die kleine Vorschau,
+  // IndexedDB hat genug Platz für die echten Kameradateien).
+  function speichereFotoOriginal(key, file) {
+    oeffneFotoDb().then(function(db) {
+      if (!db) return;
+      try { db.transaction(FOTO_STORE, "readwrite").objectStore(FOTO_STORE).put(file, key); } catch (e) {}
+    });
+  }
+
+  function ladeFotoOriginal(key) {
+    return oeffneFotoDb().then(function(db) {
+      if (!db) return null;
+      return new Promise(function(resolve) {
+        try {
+          var req = db.transaction(FOTO_STORE, "readonly").objectStore(FOTO_STORE).get(key);
+          req.onsuccess = function() { resolve(req.result || null); };
+          req.onerror = function() { resolve(null); };
+        } catch (e) { resolve(null); }
+      });
+    });
+  }
+
   function verkleinereFoto(file, callback) {
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -1249,6 +1289,7 @@
           var fotoSlotIdx = parseInt(inp.getAttribute("data-idx"), 10);
           var file = e.target.files && e.target.files[0];
           if (!file) return;
+          speichereFotoOriginal("foto-" + idx + "-" + fotoSlotIdx, file);
           verkleinereFoto(file, function(dataUrl) {
             if (!Array.isArray(zustand.fotos[idx])) zustand.fotos[idx] = new Array(s.fotoAnzahl).fill(null);
             zustand.fotos[idx][fotoSlotIdx] = dataUrl;
@@ -1261,6 +1302,7 @@
       var fotoInput = document.getElementById("foto-input");
       function fotoUebernehmen(file) {
         if (!file) return;
+        speichereFotoOriginal("foto-" + idx, file);
         verkleinereFoto(file, function(dataUrl) {
           zustand.fotos[idx] = dataUrl;
           speichereZustand();
@@ -1366,9 +1408,9 @@
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     var dauer = zustand.ende - zustand.start;
     var fotos = [];
-    zustand.fotos.forEach(function(f) {
-      if (Array.isArray(f)) { f.forEach(function(x) { if (x) fotos.push(x); }); }
-      else if (f) { fotos.push(f); }
+    zustand.fotos.forEach(function(f, idx) {
+      if (Array.isArray(f)) { f.forEach(function(x, slotIdx) { if (x) fotos.push({ thumb: x, key: "foto-" + idx + "-" + slotIdx }); }); }
+      else if (f) { fotos.push({ thumb: f, key: "foto-" + idx }); }
     });
     var code = gesammelterCode();
     var stationenGeloest = zustand.quizOk.filter(function(q) { return q; }).length;
@@ -1397,8 +1439,8 @@
         '<p class="hinweis">Zeigt diesen Code und eure Beweisfotos eurer Lehrkraft am <b>Café Coubertin</b> (Hans-Jochen-Vogel-Platz), um euren Schatz einzulösen.</p>' +
       '</div>' +
       (fotos.length ?
-        '<p class="fotostrecke-label">Eure Fotos – nur auf diesem Handy gespeichert, nirgendwo hochgeladen. Foto gedrückt halten und „Zu Fotos hinzufügen“ bzw. „Bild speichern“ wählen, um es in eurer eigenen Galerie zu sichern.</p>' +
-        '<div class="fotostrecke">' + fotos.map(function(f) { return '<img src="' + f + '" alt="">'; }).join("") + '</div>'
+        '<p class="fotostrecke-label">Eure Fotos – nur auf diesem Handy gespeichert, nirgendwo hochgeladen. Foto gedrückt halten und „Zu Fotos hinzufügen“ bzw. „Bild speichern“ wählen, um es in voller Qualität in eurer eigenen Galerie zu sichern.</p>' +
+        '<div class="fotostrecke" id="fotostrecke">' + fotos.map(function(f) { return '<img src="' + f.thumb + '" data-foto-key="' + f.key + '" alt="">'; }).join("") + '</div>'
       : "") +
       '<div class="team-liste-finale"><b>' + escapeHtml(zustand.teamname) + '</b><br>' + escapeHtml(zustand.namen) + '</div>' +
       '<button class="text-link" id="neustart-btn">Neue Runde starten</button>';
@@ -1415,7 +1457,20 @@
       zustand = { teamname: "", namen: "", regelnAkzeptiert: false, startNummer: null, start: null, ende: null, station: 0, quizOk: [], fotos: [], hinweisGenutzt: [], sliderStrafen: [], uebersprungen: [] };
       sortZustand = {};
       speichereZustand();
+      oeffneFotoDb().then(function(db) {
+        if (!db) return;
+        try { db.transaction(FOTO_STORE, "readwrite").objectStore(FOTO_STORE).clear(); } catch (e) {}
+      });
       render();
+    });
+
+    // Vorschaubilder nachträglich leise gegen die Originaldateien in voller Qualität austauschen,
+    // damit „Bild speichern“ nicht die kleine, komprimierte Vorschau sichert.
+    app.querySelectorAll("#fotostrecke img[data-foto-key]").forEach(function(imgEl) {
+      ladeFotoOriginal(imgEl.getAttribute("data-foto-key")).then(function(blob) {
+        if (!blob) return;
+        imgEl.src = URL.createObjectURL(blob);
+      });
     });
   }
 
