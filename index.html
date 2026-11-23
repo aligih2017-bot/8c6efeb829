@@ -1,5 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Olympiapark Challenge</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><title>Olympiapark Challenge</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -296,6 +295,7 @@
       kontext: "Hans-Jochen-Vogel-Platz ist eine der zentralen Veranstaltungsflächen im Olympiapark – zwischen Olympiastadion, Olympiasee und Olympiahalle gelegen. Hier finden Festivals, Sportevents und bei Fußballturnieren auch Public Viewing statt, und ganzjährig wird der Platz zum Radfahren und Inlineskaten genutzt.",
       aufgabeTyp: "mehrfach",
       aufgabeLabel: "Recherche-Auftrag",
+      aufgabeHinweistext: "Lies das Informationsschild genau durch.",
       fragen: [
         {
           frage: "Wie hieß dieser Platz früher, bis zu seiner Umbenennung 2021?",
@@ -310,10 +310,10 @@
           fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht das Jahr der Sommerspiele."
         },
         {
-          frage: "Welches Amt hatte Hans-Jochen Vogel in München (ein Wort)?",
+          frage: "Welche Position hatte Hans-Jochen Vogel in München (ein Wort)?",
           akzeptiert: ["oberbürgermeister", "bürgermeister"],
-          platzhalter: "Sein Amt (ein Wort)",
-          fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht sein Amt."
+          platzhalter: "Seine Position (ein Wort)",
+          fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht seine Position."
         }
       ],
       hinweis: "Am Hans-Jochen-Vogel-Platz steht eine Infotafel – lest sie, dort stehen alle drei Antworten. Internet braucht ihr dafür nicht.",
@@ -736,7 +736,7 @@
           '<td>' + escapeHtml(String(pr.team)) + '</td>' +
           '<td>' + (pr.namen ? escapeHtml(String(pr.namen)) : "–") + '</td>' +
           '<td class="lehrer-zelle' + (pr.fertig ? ' erledigt' : '') + '">' + fortschritt + '</td>' +
-          '<td>' + (pr.punkte != null ? pr.punkte : "–") + '</td>' +
+          '<td>' + (typeof pr.punkte === "number" && isFinite(pr.punkte) ? pr.punkte : "–") + '</td>' +
           '</tr>';
       }).join("") +
       '</tbody></table>';
@@ -912,6 +912,7 @@
       var textDraft = sortZustand["mehrfachEingabe" + i] || {};
       var sliderDraft = sortZustand["mehrfachSlider" + i] || {};
       return '<p class="aufgabe-label">' + (s.aufgabeLabel || "Entdecker-Quiz") + '</p>' +
+        (s.aufgabeHinweistext ? '<p class="station-kontext">' + s.aufgabeHinweistext + '</p>' : '') +
         s.fragen.map(function(f, fi) {
           var subOk = !!subStatus[fi];
           if (f.typ === "slider") {
@@ -993,7 +994,7 @@
           ok = eindeutig.length >= s.mindestAnzahl;
         } else {
           var wert = rohwert.toLowerCase().replace(/[\s-]/g, "");
-          ok = s.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; });
+          ok = s.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; }) || istTippfehler(wert, s.akzeptiert);
         }
         if (ok) { zustand.quizOk[i] = true; speichereZustand(); render(); }
         else {
@@ -1071,7 +1072,7 @@
           var f = s.fragen[fi];
           var eingabe = app.querySelector('.mehrfach-eingabe[data-fi="' + fi + '"]');
           var wert = eingabe.value.trim().toLowerCase().replace(/[\s-]/g, "");
-          var ok = f.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; });
+          var ok = f.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; }) || istTippfehler(wert, f.akzeptiert);
           if (ok) {
             subStatus[fi] = true;
             if (s.fragen.every(function(_, idx) { return subStatus[idx]; })) {
@@ -1427,5 +1428,4 @@
   if (LEHRKRAFT_MODUS) { renderLehrkraftPasswort(); } else { render(); }
 })();
 </script>
-
 </body></html>
