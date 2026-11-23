@@ -1,0 +1,1431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Olympiapark Challenge</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Amatic+SC:wght@400;700&family=Bree+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7e0bc; --card: rgba(248,230,196,0.92); --ink: #211a12; --muted: #6b6052;
+    --accent: #1c5fb8; --accent-ink: #0f3a73; --accent-light: #e2edfb;
+    --gold: #c9971f; --gold-light: #faf0da;
+    --border: #e3cca3; --danger: #b8402c; --ok: #2f7d4f;
+    --stille: #5a5648; --stille-light: #eceae2;
+    --bg-overlay: rgba(0,0,0,0.12);
+    --display: 'Permanent Marker', 'Segoe Print', cursive;
+    --display-label: 'Amatic SC', 'Segoe Print', cursive;
+    --body: 'Bree Serif', Georgia, serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17140f; --card: rgba(33,28,21,0.86); --ink: #f3ede1; --muted: #b3a896;
+      --accent: #5b9eef; --accent-ink: #cfe2fb; --accent-light: #1d3350;
+      --gold: #e6b84b; --gold-light: #332a12;
+      --border: #3a3325; --danger: #ff9b85; --ok: #6fd99a;
+      --stille: #c7c2b2; --stille-light: #2a2821;
+      --bg-overlay: rgba(0,0,0,0.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17140f; --card: rgba(33,28,21,0.86); --ink: #f3ede1; --muted: #b3a896;
+    --accent: #5b9eef; --accent-ink: #cfe2fb; --accent-light: #1d3350;
+    --gold: #e6b84b; --gold-light: #332a12;
+    --border: #3a3325; --danger: #ff9b85; --ok: #6fd99a;
+    --stille: #c7c2b2; --stille-light: #2a2821;
+    --bg-overlay: rgba(0,0,0,0.6);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; overflow-anchor: none; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+    z-index: 10; background: var(--accent);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('bilder/schatzkarten-hintergrund.jpg') center / cover no-repeat;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 14px 0 50px; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; }
+  p { margin: 0; line-height: 1.55; }
+
+  .spiel-kopf {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--accent); color: #fff; margin: 0 -16px 0; padding: 10px max(16px, env(safe-area-inset-left,0px)) 10px max(16px, env(safe-area-inset-right,0px));
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .spiel-kopf.still { background: var(--stille); }
+  .spiel-kopf .team { font-family: var(--display-label); font-size: 1.15rem; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .spiel-kopf .rechts { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .spiel-kopf .timer { font-family: var(--mono); font-size: 1.05rem; font-variant-numeric: tabular-nums; background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 999px; }
+  .spiel-kopf .timer.ueberzeit { background: var(--danger); color: #fff; }
+  .spiel-kopf .ausstellen-btn {
+    font-family: var(--display-label); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em;
+    background: rgba(0,0,0,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 999px;
+    padding: 5px 10px; cursor: pointer; white-space: nowrap;
+  }
+
+  .code-leiste {
+    position: sticky; top: calc(env(safe-area-inset-top, 0px) + 41px); z-index: 4;
+    background: var(--gold-light); margin: 0 -16px 16px; padding: 7px max(16px, env(safe-area-inset-left,0px)) 7px max(16px, env(safe-area-inset-right,0px));
+    display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; color: var(--gold); letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-leiste span.lbl { font-family: var(--display-label); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .code-leiste .punkte-anzeige { margin-left: auto; color: var(--ink); white-space: nowrap; }
+
+  .fortschritt-zeile { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .fortschritt { flex: 1; display: flex; gap: 5px; }
+  .fortschritt .punkt { flex: 1; height: 6px; border-radius: 999px; background: var(--border); }
+  .fortschritt .punkt.erledigt { background: var(--accent); }
+  .fortschritt .punkt.aktiv { background: var(--gold); }
+  .karte-btn {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--border);
+    background: var(--card); font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+
+  .karten-overlay { position: fixed; inset: 0; z-index: 20; background: rgba(10,8,5,0.8); display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .karten-overlay[hidden] { display: none; }
+  .karten-box { position: relative; max-width: 480px; width: 100%; max-height: 90vh; overflow: auto; border-radius: 16px; background: var(--card); padding: 10px; }
+  .karten-bild-wrap { position: relative; line-height: 0; }
+  .karten-bild { width: 100%; display: block; border-radius: 10px; }
+  .karten-pin {
+    position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+    background: radial-gradient(circle, #ff5a4d 0%, #c21807 70%); box-shadow: 0 0 0 5px rgba(255, 59, 48, 0.35);
+    animation: karten-blinken 1.1s ease-in-out infinite;
+  }
+  .karten-schliessen {
+    position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%;
+    border: none; background: rgba(0,0,0,0.6); color: #fff; font-size: 1rem; cursor: pointer; line-height: 1;
+  }
+  .karten-hinweis { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 8px; }
+  @keyframes karten-blinken { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.25; transform: scale(0.7); } }
+
+  .intro-bild { width: 100%; border-radius: 16px; display: block; margin-bottom: 18px; border: 1px solid var(--border); }
+  .intro-titel { font-size: clamp(1.7rem, 7vw, 2.3rem); line-height: 1.05; margin-bottom: 6px; }
+  .intro-sub { color: var(--muted); font-size: 0.96rem; margin-bottom: 18px; }
+  .text-karte, .karte, .punkte-breakdown, .team-liste-finale {
+    -webkit-mask-image: url('bilder/papier-maske.png'); mask-image: url('bilder/papier-maske.png');
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center; mask-position: center;
+    filter: drop-shadow(0 3px 6px rgba(33,20,8,0.25));
+  }
+  .text-karte { background: var(--card); padding: 30px 30px 32px; margin-bottom: 22px; }
+  .text-karte > *:last-child { margin-bottom: 0; }
+  .regeln { background: var(--card); padding: 16px 18px; margin-bottom: 20px; }
+  .regeln ol { margin: 8px 0 0; padding-left: 20px; font-size: 0.92rem; color: var(--muted); }
+  .regeln li { margin-bottom: 8px; }
+  .regeln b { color: var(--ink); }
+  .regeln-check {
+    display: flex; align-items: flex-start; gap: 10px; background: var(--gold-light); border: 1.5px solid var(--gold);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; cursor: pointer;
+  }
+  .regeln-check input { margin-top: 3px; width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--gold); }
+  .regeln-check span { font-family: var(--body); font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+
+  label { display: block; font-family: var(--display-label); font-weight: 700; font-size: 1rem; margin: 0 0 6px; }
+  .feld { margin-bottom: 16px; }
+  input[type="text"], textarea, select {
+    width: 100%; font-family: var(--body); font-size: 1rem; padding: 12px 14px;
+    border-radius: 10px; border: 1.5px solid var(--border); background: var(--gold-light); color: var(--ink);
+  }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 64px; }
+
+  button.primaer {
+    width: 100%; font-family: var(--body); font-weight: 700; font-size: 1.05rem;
+    padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: #fff;
+    cursor: pointer; transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  button.primaer:active { transform: scale(0.98); }
+  button.primaer:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.sekundaer {
+    width: 100%; font-family: var(--body); font-weight: 700; font-size: 0.95rem;
+    padding: 13px; border-radius: 12px; border: 2px solid var(--accent); background: transparent; color: var(--accent-ink);
+    cursor: pointer; margin-top: 10px;
+  }
+
+  .text-link { background: none; border: none; color: var(--muted); font-family: var(--body); font-size: 0.82rem; text-decoration: underline; cursor: pointer; padding: 6px 0; }
+
+  .karte { background: var(--card); padding: 30px 28px 32px; margin-bottom: 20px; }
+  .karte.still { border-color: var(--stille); }
+  .station-bild { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 12px; margin-bottom: 14px; background: var(--accent-light); }
+  .station-kicker { font-family: var(--display-label); font-size: 0.92rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 4px; }
+  .station-kicker.still { color: var(--stille); }
+  .station-titel { font-size: 1.4rem; margin-bottom: 10px; }
+  .maps-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: var(--accent-ink); background: var(--accent-light); padding: 6px 12px; border-radius: 999px; text-decoration: none; margin-bottom: 14px; }
+  .station-kontext { font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .station-kontext b { color: var(--ink); }
+  .still-hinweis { background: var(--stille-light); border-left: 3px solid var(--stille); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 0.82rem; color: var(--stille); margin-bottom: 16px; }
+
+  .aufgabe-label { font-family: var(--display-label); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 10px; }
+  .aufgabe-frage { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; }
+
+  /* MC */
+  .mc-liste { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+  .mc-option {
+    display: block; width: 100%; text-align: left; font-family: var(--body); font-size: 0.96rem;
+    padding: 13px 16px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg);
+    color: var(--ink); cursor: pointer;
+  }
+  .mc-option.richtig { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--card)); }
+  .mc-option.falsch { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, var(--card)); }
+  .mc-option:disabled { cursor: default; }
+
+  /* Sortieren */
+  .sort-liste { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .sort-item { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 12px; }
+  .sort-item .nr { font-family: var(--mono); font-weight: 700; color: var(--accent); min-width: 18px; }
+  .sort-item .txt { flex: 1; font-size: 0.9rem; }
+  .sort-item .pfeile { display: flex; flex-direction: column; gap: 2px; }
+  .sort-item .pfeile button { width: 30px; height: 24px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--ink); font-size: 0.8rem; cursor: pointer; }
+  .sort-item .pfeile button:disabled { opacity: 0.3; }
+
+  /* Slider */
+  .slider-wert { font-family: var(--mono); font-size: 2.1rem; font-weight: 700; text-align: center; color: var(--accent); margin: 4px 0 10px; }
+  input[type="range"] { width: 100%; margin: 6px 0 14px; accent-color: var(--accent); }
+
+  .feedback { font-size: 0.86rem; font-weight: 700; margin: 8px 0 0; min-height: 1.3em; }
+  .feedback.ok { color: var(--ok); }
+  .feedback.err { color: var(--danger); }
+  .feedback.hinweis { color: var(--accent); }
+
+  .mehrfach-item { margin-bottom: 14px; }
+  .mehrfach-frage { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+  .mehrfach-item .slider-wert { font-size: 1.6rem; margin: 2px 0 6px; }
+  .mehrfach-item input[type="range"] { margin: 2px 0 10px; }
+  .mehrfach-richtig { background: color-mix(in srgb, var(--ok) 14%, var(--card)); border: 1.5px solid var(--ok); border-radius: 10px; padding: 11px 14px; font-size: 0.92rem; font-weight: 700; color: var(--ok); }
+  .bonus-box { background: var(--gold-light); border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-top: 12px; font-size: 0.85rem; color: var(--ink); }
+  .bonus-box b { color: var(--gold); display: block; font-family: var(--display-label); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .bonus-box .brief { font-family: var(--mono); color: var(--gold); font-size: 0.9rem; margin-top: 6px; display: block; }
+
+  .hinweis-btn {
+    width: 100%; margin: 2px 0 16px; font-family: var(--body); font-weight: 700; font-size: 0.85rem;
+    padding: 11px; border-radius: 10px; border: 1.5px dashed var(--gold); background: var(--gold-light); color: var(--gold); cursor: pointer;
+  }
+  .hinweis-box { background: var(--gold-light); border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; padding: 10px 14px; margin: 2px 0 16px; font-size: 0.85rem; color: var(--ink); }
+  .hinweis-box b { display: block; font-family: var(--display-label); font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 3px; }
+  .hinweis-strafe { display: block; font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
+  .hinweis-bild { display: block; width: 100%; margin-top: 10px; border-radius: 8px; background: #fff; border: 1px solid var(--border); }
+
+  .trenner { height: 1px; background: var(--border); margin: 18px 0; }
+
+  .foto-bereich input[type="file"] { display: none; }
+  .foto-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    font-family: var(--body); font-weight: 700; font-size: 0.98rem; padding: 16px;
+    border-radius: 12px; border: 2px dashed var(--accent); background: var(--accent-light); color: var(--accent-ink); cursor: pointer;
+  }
+  .foto-vorschau { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 2px solid var(--ok); border-radius: 12px; padding: 10px; }
+  .foto-vorschau img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex: 0 0 auto; }
+  .foto-vorschau .info { flex: 1; font-size: 0.86rem; font-weight: 700; color: var(--ok); }
+  .foto-vorschau button { background: none; border: none; color: var(--muted); font-size: 0.78rem; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  .foto-reihe { display: flex; gap: 6px; flex-wrap: wrap; }
+  .foto-slot {
+    position: relative; flex: 1 1 calc((100% - 36px) / 7); min-width: 38px; aspect-ratio: 1/1;
+    border-radius: 9px; border: 2px dashed var(--accent); background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;
+  }
+  .foto-slot.hat-foto { border-style: solid; border-color: var(--ok); }
+  .foto-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .foto-slot-label { font-family: var(--display-label); font-weight: 700; font-size: 1.5rem; color: var(--accent-ink); }
+  .foto-slot input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .foto-reihe-hinweis { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+
+  .weiter-zeile { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .weiter-zeile .zurueck { flex: 0 0 auto; background: none; border: none; color: var(--muted); font-family: var(--body); font-weight: 700; font-size: 0.9rem; cursor: pointer; padding: 15px 6px; }
+  .weiter-zeile .weiter { flex: 1; }
+  .ueberspringen-btn {
+    flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25;
+    font-family: var(--body); font-weight: 700; font-size: 0.68rem;
+    padding: 4px 10px; border-radius: 10px; border: 1.5px dashed var(--danger); background: transparent; color: var(--danger); cursor: pointer;
+  }
+
+  .uebersicht-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; color: var(--muted); font-family: var(--body); font-size: 0.82rem; cursor: pointer; margin-bottom: 14px; text-decoration: underline; }
+  .uebersicht-liste { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .uebersicht-liste li { font-size: 0.86rem; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
+  .uebersicht-liste .nr { font-family: var(--mono); color: var(--accent); min-width: 16px; }
+  .uebersicht-liste li.fertig { color: var(--ink); }
+
+  .finale-bild { width: 100%; border-radius: 16px; margin-bottom: 18px; border: 1px solid var(--border); }
+  .finale-zeit { font-family: var(--mono); font-size: 3rem; font-weight: 700; color: var(--gold); text-align: center; margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+  .finale-label { text-align: center; color: var(--muted); font-size: 0.82rem; margin-bottom: 18px; }
+  .punkte-breakdown { background: var(--card); padding: 26px 26px 24px; margin: 0 0 22px; font-size: 0.88rem; }
+  .punkte-zeile { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; }
+  .punkte-zeile + .punkte-zeile { border-top: 1px solid var(--border); }
+  .finale-zeit-klein { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--border); }
+  .schatz-box { background: var(--gold-light); border: 2px dashed var(--gold); border-radius: 16px; padding: 22px; text-align: center; margin-bottom: 18px; }
+  .schatz-box .kicker { font-family: var(--display-label); font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 8px; }
+  .schatz-code { font-family: var(--mono); font-size: 2rem; font-weight: 700; letter-spacing: 0.2em; color: var(--ink); margin-bottom: 6px; }
+  .schatz-box p.hinweis { font-size: 0.86rem; color: var(--muted); }
+  .team-liste-finale { background: var(--card); padding: 26px 26px; margin-bottom: 22px; font-size: 0.9rem; }
+  .team-liste-finale b { font-family: var(--display-label); font-size: 1.1rem; }
+  .fotostrecke-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+  .fotostrecke { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 18px; }
+  .fotostrecke img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+
+  .lehrer-tabelle { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 10px; }
+  .lehrer-tabelle th, .lehrer-tabelle td { padding: 9px 6px; text-align: center; border-bottom: 1px solid var(--border); }
+  .lehrer-tabelle th:nth-child(2), .lehrer-tabelle td:nth-child(2),
+  .lehrer-tabelle th:nth-child(3), .lehrer-tabelle td:nth-child(3) { text-align: left; }
+  .lehrer-tabelle th { font-family: var(--display-label); font-size: 0.95rem; font-weight: 700; color: var(--muted); }
+  .lehrer-zelle.erledigt { color: var(--ok); font-weight: 800; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function() {
+  var STATIONEN = [
+    {
+      titel: "Hans-Jochen-Vogel-Platz",
+      bild: "bilder/station1.jpg",
+      maps: "Hans-Jochen-Vogel-Platz München",
+      kontext: "Hans-Jochen-Vogel-Platz ist eine der zentralen Veranstaltungsflächen im Olympiapark – zwischen Olympiastadion, Olympiasee und Olympiahalle gelegen. Hier finden Festivals, Sportevents und bei Fußballturnieren auch Public Viewing statt, und ganzjährig wird der Platz zum Radfahren und Inlineskaten genutzt.",
+      aufgabeTyp: "mehrfach",
+      aufgabeLabel: "Recherche-Auftrag",
+      fragen: [
+        {
+          frage: "Wie hieß dieser Platz früher, bis zu seiner Umbenennung 2021?",
+          akzeptiert: ["coubertinplatz"],
+          platzhalter: "Alter Name des Platzes",
+          fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht der alte Name."
+        },
+        {
+          frage: "In welchem Jahr fanden hier die Siegerehrungen der Olympischen Sommerspiele statt?",
+          akzeptiert: ["1972"],
+          platzhalter: "Jahreszahl",
+          fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht das Jahr der Sommerspiele."
+        },
+        {
+          frage: "Welches Amt hatte Hans-Jochen Vogel in München (ein Wort)?",
+          akzeptiert: ["oberbürgermeister", "bürgermeister"],
+          platzhalter: "Sein Amt (ein Wort)",
+          fehlerHinweis: "Schaut auf die Infotafel am Platz, dort steht sein Amt."
+        }
+      ],
+      hinweis: "Am Hans-Jochen-Vogel-Platz steht eine Infotafel – lest sie, dort stehen alle drei Antworten. Internet braucht ihr dafür nicht.",
+      buchstabe: "R",
+      codePos: 1,
+      bonus: "Vogel war von 1960 bis 1972 Oberbürgermeister Münchens und einer der Väter der Münchner Olympiabewerbung – deshalb trägt der Platz heute seinen Namen.",
+      foto: "Geht runter zum Theatron am Olympiasee (das Freiluft-Amphitheater mit den Steinstufen) und macht dort ein Gruppenfoto in Siegerpose – Arme hoch, wie bei einer echten Siegerehrung."
+    },
+    {
+      titel: "Olympiasee",
+      bild: "bilder/station4.jpg",
+      maps: "Olympiasee München",
+      kontext: "Der See lädt zum Spazieren, Bootfahren und Entspannen ein. Schaut genau hin, am und im Wasser gibt es einiges zu entdecken.",
+      aufgabeTyp: "text",
+      aufgabeLabel: "Rechenaufgabe",
+      frage: "Rechnet: Ein Tretboot auf dem Olympiasee ist ungefähr 2,5 m lang und 1,2 m breit. Stellt euch vor, 3 Tretboote stehen in der Länge nebeneinander in einer Reihe. Wenn ihr ein Seil straff um die ganze Reihe spannt – wie lang muss das Seil mindestens sein (in Metern)?",
+      akzeptiert: ["17.4", "17,4", "17.4m", "17,4m", "17.4 m", "17,4 m"],
+      platzhalter: "Eure Antwort (Meter)",
+      fehlerHinweis: "Noch nicht richtig, denkt an die Umfang-Formel für ein Rechteck: 2 × (Länge + Breite).",
+      hinweis: "Die Reihe aus 3 Tretbooten ist 7,5 m lang (3 × 2,5 m) und 1,2 m breit. Seillänge = 2 × (7,5 + 1,2).",
+      hinweisBild: "bilder/tretboot-skizze.png",
+      bonus: "2 × (7,5 + 1,2) = 17,4 Meter Seil würdet ihr brauchen – gut, dass ihr keins einpacken musstet!",
+      foto: "Macht ein Foto, auf dem mindestens eine Brücke oder ein Steg UND ein Wasservogel zu sehen sind. Findet ihr beides nicht, zählt stattdessen die Boote auf dem Wasser und haltet die Zahl mit den Fingern ins Bild."
+    },
+    {
+      titel: "Walk of Stars",
+      bild: "bilder/walkofstars.jpg",
+      maps: "Munich Olympic Walk of Stars",
+      kontext: "Am Seeufer, direkt am Fuß des Olympiaturms, liegt die 800 Meter lange <b>Ruhmesstraße der Legenden</b> – der Münchner Walk of Stars. Über 170 Stars haben hier ihre Hände in frischen Zement gedrückt: Päpste, Bundespräsidenten, Olympiasieger und Weltstars aus Musik und Sport liegen hier Seite an Seite. Lauft die Platten ab und sucht die Antworten auf der Infotafel und direkt im Zement.",
+      aufgabeTyp: "mehrfach",
+      aufgabeLabel: "Spurensuche",
+      fragen: [
+        {
+          frage: "Wann wurde der Walk of Stars eingeweiht?",
+          akzeptiert: ["2003"],
+          platzhalter: "Jahreszahl",
+          fehlerHinweis: "Schaut auf die Infotafel am Anfang des Walk of Stars."
+        },
+        {
+          frage: "Wann hat sich Helene Fischer hier zum zweiten Mal verewigt?",
+          akzeptiert: ["2018"],
+          platzhalter: "Jahreszahl",
+          fehlerHinweis: "Sucht die Platte von Helene Fischer – sie hat sich hier gleich zweimal verewigt, gesucht ist das zweite Jahr."
+        },
+        {
+          frage: "Wie viele Hände sind auf dem Stein der Band PUR zu finden?",
+          akzeptiert: ["7", "sieben"],
+          platzhalter: "Zahl",
+          fehlerHinweis: "Sucht die Platte von PUR und zählt die Handabdrücke."
+        },
+        {
+          frage: "Welche deutsche Sängerin bekam 2022 ihren Stern?",
+          akzeptiert: ["sarah connor"],
+          platzhalter: "Name",
+          fehlerHinweis: "Sucht die Platte mit der Jahreszahl 2022."
+        },
+        {
+          frage: "Wie heißt die deutsche Band, die den Stein links neben Herbert Grönemeyer hat?",
+          akzeptiert: ["rammstein"],
+          platzhalter: "Bandname",
+          fehlerHinweis: "Sucht die Platte von Herbert Grönemeyer und schaut, welche Band direkt links daneben liegt."
+        }
+      ],
+      hinweis: "Es gibt zwei Infotafeln, eine am linken und eine am rechten Ende des Walk of Stars – dort steht auch das Eröffnungsjahr. Sucht außerdem die Platten von Helene Fischer, von PUR, von Herbert Grönemeyer und die mit der Jahreszahl 2022.",
+      bonus: "Über 170 Stars haben sich hier schon verewigt – von Fußballlegenden bis zu Weltstars der Musik.",
+      foto: "Sucht die Platte von Metallica und macht ein Foto davon mit eurem ganzen Team drumherum."
+    },
+    {
+      titel: "Olympiaturm",
+      bild: "bilder/station6.jpg",
+      maps: "Olympiaturm München",
+      kontext: "Der Olympiaturm ist das höchste Bauwerk im Park und war schon fertig, bevor die Spiele 1972 überhaupt stattfanden. Aktuell ist er wegen Sanierung geschlossen, ihr könnt ihn nur von außen bestaunen.",
+      aufgabeTyp: "mehrfach",
+      aufgabeLabel: "Schätzfragen zum Turm (wilde Ratespiele kosten Punkte!)",
+      fragen: [
+        {
+          typ: "slider",
+          frage: "Schätzt: Wie hoch ist der Olympiaturm ungefähr (in Metern)?",
+          min: 0, max: 400, start: 200, ziel: 291, toleranz: 10, strafToleranz: 10, einheit: "m"
+        },
+        {
+          typ: "slider",
+          frage: "Schätzt: Auf welcher Höhe liegt das Drehrestaurant im Turm ungefähr (in Metern)?",
+          min: 0, max: 300, start: 150, ziel: 181, toleranz: 10, strafToleranz: 10, einheit: "m"
+        },
+        {
+          typ: "slider",
+          frage: "Schätzt: Wie lange dauert die Fahrt mit dem Aufzug ungefähr nach oben (in Sekunden)?",
+          min: 0, max: 120, start: 45, ziel: 27, toleranz: 10, strafToleranz: 10, einheit: "s"
+        }
+      ],
+      hinweis: "Der Turm ist deutlich höher als 250 Meter, aber niedriger als 350 Meter.",
+      buchstabe: "E",
+      codePos: 5,
+      bonus: "Bei guter Sicht kann man von oben sogar bis zu den Alpen sehen, das geht aber erst wieder nach der Sanierung.",
+      foto: "Macht ein Foto mit einem Perspektiven-Trick: Es soll so aussehen, als würde jemand aus eurem Team den Turm mit zwei Fingern zusammendrücken."
+    },
+    {
+      titel: "Olympiastadion & Zeltdach",
+      bild: "bilder/station3.jpg",
+      maps: "Olympiastadion München",
+      kontext: "Das Dach über dem Stadion gilt bis heute als Meisterwerk der Ingenieurskunst, entworfen vom Architekten <b>Frei Otto</b>. Es ist ein Netz aus tausenden Metern Stahlseil, eingespannt zwischen hohen Masten.<br><br>Von 1972 bis 2005 war hier die Heimat von <b>FC Bayern München</b> und dem <b>TSV 1860 München</b>, bevor beide Vereine in die Allianz Arena umzogen. 1974 wurde hier sogar das <b>WM-Finale</b> ausgetragen, das Deutschland 2:1 gegen die Niederlande gewann. Heute finden im Stadion vor allem große <b>Konzerte</b> statt.",
+      aufgabeTyp: "text",
+      frage: "In die Seilnetze sind durchsichtige Platten aus einem bestimmten Material eingespannt. Wie heißt dieses Material? (ein Wort)",
+      akzeptiert: ["acrylglas", "acryl"],
+      platzhalter: "Eure Antwort",
+      fehlerHinweis: "Noch nicht richtig, schaut euch das Dach nochmal genau an.",
+      hinweis: "Das Material ist durchsichtig und wird auch für Brillengläser oder Aquarien verwendet – es beginnt mit „Acryl“.",
+      buchstabe: "N",
+      codePos: 3,
+      bonus: "Das Dach war ursprünglich nur für 15 Jahre geplant und steht jetzt schon seit über 50 Jahren.",
+      foto: "Macht ein Foto, bei dem euer Team so tut, als würde es das Dach gemeinsam hochstemmen."
+    },
+    {
+      titel: "Olympiaberg",
+      bild: "bilder/station5.jpg",
+      maps: "Olympiaberg München",
+      kontext: "Der Olympiaberg ist die höchste Erhebung im Park und bietet oben einen tollen Blick über das ganze Gelände. Seine Geschichte ist überraschender, als man beim Hochlaufen vermuten würde, manche Münchner nannten ihn früher sogar <b>Schuttberg</b>, weil er komplett aus Trümmerschutt des Zweiten Weltkriegs aufgeschüttet wurde.",
+      aufgabeTyp: "slider",
+      frage: "Schätzt: Wie viele Meter ragt der Olympiaberg über das umliegende Gelände auf?",
+      min: 0, max: 150, start: 75, ziel: 60, toleranz: 15, einheit: "m",
+      hinweis: "Der Berg ist höher als 50 Meter, aber niedriger als 70 Meter.",
+      buchstabe: "G",
+      codePos: 4,
+      bonus: "Er ist rund 60 Meter hoch, fast komplett von Hand und mit Baumaschinen aufgeschüttet.",
+      foto: "Lauft gemeinsam auf den Gipfel. Macht oben ein Foto mit eurem ganzen Team, am besten mit Blick über den Park."
+    },
+    {
+      titel: "Erinnerungsort Olympia-Attentat",
+      bild: "bilder/station2.jpg",
+      maps: "Erinnerungsort Olympia-Attentat München",
+      still: true,
+      kontext: "Nicht weit von hier liegt der Erinnerungsort Olympia-Attentat. Am 5. September 1972 wurden Mitglieder der israelischen Olympiamannschaft hier als Geiseln genommen. Lest die Informationstafeln vor Ort in Ruhe durch, bevor ihr die Fragen beantwortet.",
+      stillHinweis: "Das ist ein Ort zum Nachdenken, keine Fotochallenge. Bitte leise und respektvoll.",
+      aufgabeTyp: "mehrfach",
+      aufgabeLabel: "Lesen und verstehen",
+      fragen: [
+        {
+          frage: "Wie heißt dieser Gedenkort mit seinem eigenen Namen?",
+          akzeptiert: ["einschnitt"],
+          platzhalter: "Name des Gedenkorts",
+          fehlerHinweis: "Der Name steht auf der Infotafel direkt am Eingang."
+        },
+        {
+          frage: "In welchem Jahr wurde dieser Erinnerungsort eröffnet?",
+          akzeptiert: ["2017"],
+          platzhalter: "Jahreszahl",
+          fehlerHinweis: "Das Eröffnungsjahr steht auf der Infotafel."
+        },
+        {
+          frage: "Wie viele Menschen kamen beim Attentat insgesamt ums Leben (Sportler, Trainer und Polizist zusammen)?",
+          akzeptiert: ["12", "zwölf"],
+          platzhalter: "Zahl",
+          fehlerHinweis: "Die Zahl der Opfer steht auf der Infotafel."
+        }
+      ],
+      hinweis: "Der Name des Gedenkorts und das Eröffnungsjahr stehen auf der Infotafel am Eingang, die Opferzahl weiter hinten in der Ausstellung.",
+      buchstabe: "I",
+      codePos: 2,
+      bonus: "Der Gedenkort „Einschnitt“ wurde erst 2017, 45 Jahre nach dem Attentat, eröffnet. Er erinnert an die elf israelischen Sportler und Trainer sowie den bayerischen Polizisten, die bei dem Anschlag ums Leben kamen.",
+      foto: "Macht ein ruhiges Foto von der Gedenkstätte oder einer Infotafel. Keine Posen."
+    },
+    {
+      titel: "Team-Kunstwerk",
+      bild: "bilder/station7.jpg",
+      maps: "Olympiapark München",
+      kontext: "Sucht euch eine schöne freie Fläche im Park, zum Beispiel unter dem Zeltdach oder auf einer der großen Wiesen.",
+      aufgabeTyp: "text",
+      aufgabeLabel: "Wortschatz",
+      frage: "Findet mindestens 3 Wörter, die mit „Olympia“ zusammengesetzt sind. Trennt sie mit Kommas.",
+      mindestAnzahl: 3,
+      praefix: "olympia",
+      platzhalter: "Eure Wörter, durch Kommas getrennt",
+      fehlerHinweis: "Noch nicht genug passende Wörter, schaut euch nochmal um, wie viele Orte hier „Olympia-“ heißen.",
+      hinweis: "Schaut auf die Wegweiser und Hinweisschilder im Park – viele Orte heißen „Olympia-“ plus einem Wort wie Berg, See oder Turm.",
+      bonus: "Olympiapark, Olympiaturm, Olympiaberg, Olympiasee, Olympiastadion, Olympiadorf, Olympiahalle – es gibt ziemlich viele!",
+      fotoAnzahl: 7,
+      fotoLabels: ["O", "L", "Y", "M", "P", "I", "A"],
+      foto: "Schreibt gemeinsam mit euren Körpern das Wort OLYMPIA. Bildet nacheinander jeden Buchstaben nach und lasst euch dabei fotografieren – für jeden Buchstaben ein eigenes Foto, am Ende stehen alle 7 nebeneinander."
+    }
+  ];
+
+  var SPEICHER_KEY = "olympiapark-rallye-v3";
+  var SPIELZEIT_MS = 120 * 60 * 1000;
+
+  function ladeZustand() {
+    try {
+      var roh = localStorage.getItem(SPEICHER_KEY);
+      if (roh) return JSON.parse(roh);
+    } catch (e) {}
+    return { teamname: "", namen: "", regelnAkzeptiert: false, startNummer: null, start: null, ende: null, station: 0, quizOk: [], fotos: [], hinweisGenutzt: [], sliderStrafen: [], uebersprungen: [] };
+  }
+  function speichereZustand() {
+    try { localStorage.setItem(SPEICHER_KEY, JSON.stringify(zustand)); } catch (e) {}
+    sendePraesenz();
+  }
+  var zustand = ladeZustand();
+  var sortZustand = {};
+
+  var LEHRKRAFT_MODUS = /(^|[?&])lehrkraft=1(&|$)/.test(location.search);
+  var raum = null;
+  var raumBereit = (window.claude && window.claude.use)
+    ? window.claude.use("room").then(function(r) { raum = r; return r; }).catch(function() { return null; })
+    : Promise.resolve(null);
+  raumBereit.then(function() { sendePraesenz(); });
+
+  function sendePraesenz() {
+    if (!raum || !zustand.start) return;
+    try {
+      raum.presence({
+        team: zustand.teamname || "Unbenanntes Team",
+        namen: zustand.namen || "",
+        startNummer: zustand.startNummer,
+        quizOk: zustand.quizOk,
+        punkte: berechneBasisPunkte(),
+        fertig: !!zustand.ende
+      });
+    } catch (e) {}
+  }
+
+  var KARTEN_POSITIONEN = [
+    { x: 44, y: 50 },
+    { x: 50, y: 61 },
+    { x: 54, y: 59 },
+    { x: 57, y: 46 },
+    { x: 17, y: 57 },
+    { x: 48, y: 82 },
+    { x: 38, y: 20 },
+    { x: 48, y: 47 }
+  ];
+
+  var ROTIERBAR = [0, 1, 2, 3, 4];
+  var FIX_ENDE = [5, 6, 7];
+  function route() {
+    var n = ((zustand.startNummer || 1) - 1) % ROTIERBAR.length;
+    return ROTIERBAR.slice(n).concat(ROTIERBAR.slice(0, n)).concat(FIX_ENDE);
+  }
+
+  var app = document.getElementById("app");
+  var timerInterval = null;
+
+  function formatZeit(ms) {
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    var rest = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (rest < 10 ? "0" : "") + rest;
+  }
+
+  function gesammelterCode(bisZuIndex) {
+    var lettered = [];
+    STATIONEN.forEach(function(s, idx) {
+      if (s.buchstabe) lettered.push({ idx: idx, s: s });
+    });
+    lettered.sort(function(a, b) { return a.s.codePos - b.s.codePos; });
+    var buchstaben = [];
+    lettered.forEach(function(x) {
+      if (zustand.quizOk[x.idx]) buchstaben.push(x.s.buchstabe);
+      else if (bisZuIndex !== undefined) buchstaben.push("_");
+    });
+    return buchstaben.join(bisZuIndex !== undefined ? " " : "");
+  }
+
+  function fotoIstVollstaendig(s, idx) {
+    if (s.fotoAnzahl > 1) {
+      var arr = zustand.fotos[idx];
+      return Array.isArray(arr) && arr.length === s.fotoAnzahl && arr.every(function(f) { return !!f; });
+    }
+    return !!zustand.fotos[idx];
+  }
+
+  function berechneBasisPunkte() {
+    var punkte = 0;
+    STATIONEN.forEach(function(s, idx) {
+      if (zustand.quizOk[idx]) punkte += 10;
+      if (fotoIstVollstaendig(s, idx)) punkte += 5;
+    });
+    var hinweisAnzahl = zustand.hinweisGenutzt.filter(function(h) { return h; }).length;
+    punkte -= hinweisAnzahl * 3;
+    var strafenAnzahl = 0;
+    (zustand.sliderStrafen || []).forEach(function(obj) {
+      if (!obj) return;
+      Object.keys(obj).forEach(function(k) { if (obj[k]) strafenAnzahl++; });
+    });
+    punkte -= strafenAnzahl;
+    var uebersprungenAnzahl = (zustand.uebersprungen || []).filter(function(u) { return u; }).length;
+    punkte -= uebersprungenAnzahl * 10;
+    return punkte;
+  }
+
+  function berechneVerspaetungMinuten() {
+    if (!zustand.ende) return 0;
+    return Math.max(0, Math.ceil(((zustand.ende - zustand.start) - SPIELZEIT_MS) / 60000));
+  }
+
+  function berechneVerspaetungsstrafe() {
+    var min = berechneVerspaetungMinuten();
+    if (min > 20) return 50;
+    if (min > 10) return 20;
+    return min;
+  }
+
+  function berechnePunkte() {
+    return berechneBasisPunkte() - berechneVerspaetungsstrafe();
+  }
+
+  function levenshtein(a, b) {
+    var m = a.length, n = b.length;
+    var dp = [], i, j;
+    for (i = 0; i <= m; i++) dp[i] = [i];
+    for (j = 0; j <= n; j++) dp[0][j] = j;
+    for (i = 1; i <= m; i++) {
+      for (j = 1; j <= n; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+    return dp[m][n];
+  }
+
+  function istTippfehler(wert, akzeptiert) {
+    if (!wert) return false;
+    return akzeptiert.some(function(a) {
+      var an = a.replace(/[\s-]/g, "");
+      if (!/[a-zäöüß]/i.test(an)) return false;
+      var dist = levenshtein(wert, an);
+      return dist > 0 && dist <= 2 && dist < an.length;
+    });
+  }
+
+  function scrollSeiteNachOben() {
+    requestAnimationFrame(function() {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      app.scrollTop = 0;
+      if (app.scrollIntoView) app.scrollIntoView({ block: "start", inline: "nearest" });
+      [60, 150, 350].forEach(function(verzoegerung) {
+        setTimeout(function() {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+          if (app.scrollIntoView) app.scrollIntoView({ block: "start", inline: "nearest" });
+        }, verzoegerung);
+      });
+    });
+  }
+
+  function render() {
+    if (!zustand.start) { renderIntro(); }
+    else if (zustand.ende) { renderFinale(); }
+    else { renderStation(); }
+  }
+
+  var LEHRKRAFT_PASSWORT = "Olympia72";
+
+  function renderLehrkraftPasswort() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    app.innerHTML =
+      '<button class="text-link" id="lehrkraft-zurueck">← Zurück zur Challenge</button>' +
+      '<div class="text-karte"><h1 class="intro-titel">Lehreransicht</h1>' +
+      '<p class="intro-sub">Nur für die Lehrkraft. Bitte Passwort eingeben.</p></div>' +
+      '<div class="feld"><label for="f-lehrkraft-pw">Passwort</label>' +
+        '<input type="password" id="f-lehrkraft-pw" placeholder="Passwort" autocomplete="off"></div>' +
+      '<button class="primaer" id="lehrkraft-pw-btn">Bestätigen</button>' +
+      '<p class="feedback err" id="lehrkraft-pw-feedback"></p>';
+    document.getElementById("lehrkraft-zurueck").addEventListener("click", function() { render(); });
+    var eingabe = document.getElementById("f-lehrkraft-pw");
+    var feedback = document.getElementById("lehrkraft-pw-feedback");
+    function pruefen() {
+      if (eingabe.value === LEHRKRAFT_PASSWORT) { renderLehrkraftAnsicht(); }
+      else {
+        feedback.textContent = "Falsches Passwort.";
+        eingabe.value = "";
+        eingabe.focus();
+      }
+    }
+    document.getElementById("lehrkraft-pw-btn").addEventListener("click", pruefen);
+    eingabe.addEventListener("keydown", function(e) { if (e.key === "Enter") pruefen(); });
+    eingabe.focus();
+  }
+
+  function renderLehrkraftAnsicht() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    app.innerHTML =
+      '<button class="text-link" id="lehrkraft-zurueck">← Zurück zur Challenge</button>' +
+      '<div class="text-karte"><h1 class="intro-titel">Lehreransicht</h1>' +
+      '<p class="intro-sub">Live-Fortschritt aller Teams, solange deren Handys die Seite offen haben. Kein Standort, keine Fotos – nur welche Station erledigt ist. Diesen Link nicht an die Klasse weitergeben.</p></div>' +
+      '<div id="lehrer-inhalt"><p class="station-kontext">Verbinde …</p></div>';
+    document.getElementById("lehrkraft-zurueck").addEventListener("click", function() { render(); });
+    raumBereit.then(function(r) {
+      var ziel = document.getElementById("lehrer-inhalt");
+      if (!r) { ziel.innerHTML = '<p class="station-kontext">Live-Ansicht ist in dieser Umgebung nicht verfügbar.</p>'; return; }
+      r.onPeers(function(change) { zeichneLehrerTabelle(change.peers); });
+    });
+  }
+
+  function zeichneLehrerTabelle(peers) {
+    var ziel = document.getElementById("lehrer-inhalt");
+    if (!ziel) return;
+    var teams = peers.filter(function(p) { return p.presence && p.presence.team; });
+    if (!teams.length) {
+      ziel.innerHTML = '<p class="station-kontext">Noch kein Team verbunden. Die Ansicht aktualisiert sich automatisch, sobald ein Team startet.</p>';
+      return;
+    }
+    teams = teams.slice().sort(function(a, b) {
+      var na = a.presence.startNummer, nb = b.presence.startNummer;
+      if (na == null && nb == null) return 0;
+      if (na == null) return 1;
+      if (nb == null) return -1;
+      return na - nb;
+    });
+    ziel.innerHTML = '<table class="lehrer-tabelle"><thead><tr>' +
+      '<th>Gruppe</th><th>Gruppenname</th><th>Mitglieder</th><th>Fortschritt</th><th>Punkte</th>' +
+      '</tr></thead><tbody>' +
+      teams.map(function(p) {
+        var pr = p.presence;
+        var geloest = Array.isArray(pr.quizOk) ? pr.quizOk.filter(function(q) { return q; }).length : 0;
+        var fortschritt = pr.fertig ? "🏁 Fertig" : geloest + " / " + STATIONEN.length + " Stationen";
+        return '<tr>' +
+          '<td>' + (pr.startNummer != null ? escapeHtml(String(pr.startNummer)) : "–") + '</td>' +
+          '<td>' + escapeHtml(String(pr.team)) + '</td>' +
+          '<td>' + (pr.namen ? escapeHtml(String(pr.namen)) : "–") + '</td>' +
+          '<td class="lehrer-zelle' + (pr.fertig ? ' erledigt' : '') + '">' + fortschritt + '</td>' +
+          '<td>' + (pr.punkte != null ? pr.punkte : "–") + '</td>' +
+          '</tr>';
+      }).join("") +
+      '</tbody></table>';
+  }
+
+  function renderIntro() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    app.innerHTML =
+      '<img class="intro-bild" src="bilder/intro.jpg" alt="Olympiapark Challenge" onerror="this.style.display=\'none\'">' +
+      '<div class="text-karte"><h1 class="intro-titel">Olympiapark Challenge</h1>' +
+      '<p class="intro-sub">Tief im Olympiapark liegt ein Schatz verborgen – sein Code ist in alle Winde zerstreut. Nur wer die acht Stationen meistert, unterwegs die Augen offenhält und als Team zusammenhält, setzt ihn wieder zusammen. Die Uhr tickt, sobald ihr startet. Seid ihr bereit?</p></div>' +
+      '<div class="regeln"><b>Das Regelwerk</b><ol>' +
+        '<li>Bleibt als Team zusammen, lauft nicht einzeln los.</li>' +
+        '<li>Die Stationen werden der Reihe nach gelöst. Kommt ihr partout nicht weiter, könnt ihr eine Station überspringen – das kostet 10 Punkte.</li>' +
+        '<li>Ohne das geforderte Beweisfoto geht es bei keiner Station weiter.</li>' +
+        '<li>Löst die Rätsel mit dem, was ihr vor Ort seht und wisst – zum Beispiel auf Infotafeln im Park. Eine Internetsuche braucht ihr nirgendwo.</li>' +
+        '<li><b>Eure Startnummer (1–5)</b> bestimmt, bei welcher Station ihr anfangt – jedes Team startet woanders, damit ihr euch nicht alle gegenseitig im Weg steht. Die letzten beiden Stationen vor dem Finale sind für alle gleich.</li>' +
+        '<li>Eine Station ist zum Innehalten da, keine Spaßchallenge. Verhaltet euch dort respektvoll.</li>' +
+        '<li>Passt im Park auf Radfahrer, andere Spaziergänger:innen und euch selbst auf.</li>' +
+        '<li><b>Sobald ihr startet, läuft ein Countdown von 120 Minuten.</b> Pausieren oder zurücksetzen geht nicht. Wenn ihr fertig seid, drückt oben auf „Ausstellen“.</li>' +
+        '<li>Seid ihr fertig, kommt zum <b>Café Coubertin</b> (Hans-Jochen-Vogel-Platz) – dort trefft ihr eure Lehrkraft und löst euren Schatz-Code ein.</li>' +
+        '<li><b>Punkte:</b> Jede gelöste Aufgabe gibt 10 Punkte, ein Beweisfoto 5 Punkte. Ein Hinweis kostet 3 Punkte. Seid ihr nach 120 Minuten noch nicht an der letzten Station, kostet jede Minute Verspätung 1 Punkt (ab 10 Minuten 20 Punkte, ab 20 Minuten 50 Punkte) – schneller fertig sein bringt aber keine Extrapunkte, hetzt euch also nicht.</li>' +
+      '</ol></div>' +
+      '<label class="regeln-check" for="f-regeln"><input type="checkbox" id="f-regeln"><span>Wir haben das Regelwerk gelesen und halten uns als Team daran.</span></label>' +
+      '<div class="feld"><label for="f-team">Euer Teamname</label>' +
+        '<input type="text" id="f-team" placeholder="z. B. Die Falken" value="' + escapeHtml(zustand.teamname) + '"></div>' +
+      '<div class="feld"><label for="f-namen">Eure Namen</label>' +
+        '<textarea id="f-namen" placeholder="z. B. Lena, Max, Jonas, Mia">' + escapeHtml(zustand.namen) + '</textarea></div>' +
+      '<div class="feld"><label for="f-start">Eure Startnummer (von eurer Lehrkraft)</label>' +
+        '<select id="f-start"><option value="" disabled selected>Startnummer wählen</option>' +
+        '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>' +
+        '</select></div>' +
+      '<button class="primaer" id="start-btn">Los geht’s</button>' +
+      '<div style="text-align:center;margin-top:18px;"><button class="text-link" id="lehrkraft-link">Du bist die Lehrkraft? Lehreransicht öffnen</button></div>';
+
+    var teamInput = document.getElementById("f-team");
+    var namenInput = document.getElementById("f-namen");
+    var startInput = document.getElementById("f-start");
+    var regelnCheck = document.getElementById("f-regeln");
+    var startBtn = document.getElementById("start-btn");
+
+    function pruefeBereit() {
+      startBtn.disabled = !(teamInput.value.trim() && namenInput.value.trim() && startInput.value && regelnCheck.checked);
+    }
+    teamInput.addEventListener("input", pruefeBereit);
+    namenInput.addEventListener("input", pruefeBereit);
+    startInput.addEventListener("change", pruefeBereit);
+    regelnCheck.addEventListener("change", pruefeBereit);
+    pruefeBereit();
+
+    startBtn.addEventListener("click", function() {
+      if (!regelnCheck.checked || !startInput.value) return;
+      zustand.teamname = teamInput.value.trim();
+      zustand.namen = namenInput.value.trim();
+      zustand.startNummer = parseInt(startInput.value, 10);
+      zustand.regelnAkzeptiert = true;
+      zustand.start = Date.now();
+      zustand.station = 0;
+      zustand.quizOk = STATIONEN.map(function() { return false; });
+      zustand.hinweisGenutzt = STATIONEN.map(function() { return false; });
+      zustand.fotos = STATIONEN.map(function(s) { return s.fotoAnzahl > 1 ? new Array(s.fotoAnzahl).fill(null) : null; });
+      zustand.sliderStrafen = STATIONEN.map(function() { return {}; });
+      zustand.uebersprungen = STATIONEN.map(function() { return false; });
+      speichereZustand();
+      render();
+      scrollSeiteNachOben();
+    });
+
+    document.getElementById("lehrkraft-link").addEventListener("click", function() {
+      renderLehrkraftPasswort();
+    });
+  }
+
+  function verkleinereFoto(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var maxW = 280;
+        var scale = Math.min(1, maxW / img.width);
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL("image/jpeg", 0.62));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function pruefeFreischaltung(i) {
+    var s = STATIONEN[i];
+    var quizOk = s.aufgabeTyp ? zustand.quizOk[i] : true;
+    var fotoOk = fotoIstVollstaendig(s, i);
+    return quizOk && fotoOk;
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function renderAufgabe(s, i) {
+    var gel = zustand.quizOk[i];
+    if (!s.aufgabeTyp) return "";
+
+    if (s.aufgabeTyp === "mc") {
+      return '<p class="aufgabe-label">Wissensfrage</p>' +
+        '<p class="aufgabe-frage">' + s.frage + '</p>' +
+        '<div class="mc-liste" id="mc-liste">' +
+        s.optionen.map(function(opt, idx) {
+          var cls = "mc-option" + (gel && idx === s.richtig ? " richtig" : "");
+          return '<button class="' + cls + '" data-idx="' + idx + '"' + (gel ? ' disabled' : '') + '>' + escapeHtml(opt) + '</button>';
+        }).join("") +
+        '</div><p class="feedback" id="feedback"></p>' +
+        (gel ? bonusHtml(s) : '') + '<div class="trenner"></div>';
+    }
+
+    if (s.aufgabeTyp === "text") {
+      var textWert = sortZustand["text" + i] || "";
+      return '<p class="aufgabe-label">' + (s.aufgabeLabel || "Begriff gesucht") + '</p>' +
+        '<p class="aufgabe-frage">' + s.frage + '</p>' +
+        (gel
+          ? '<input type="text" value="' + escapeHtml(textWert) + '" disabled>'
+          : '<input type="text" id="text-eingabe" placeholder="' + escapeHtml(s.platzhalter || "") + '" value="' + escapeHtml(textWert) + '" autocomplete="off">' +
+            '<button class="sekundaer" id="text-pruefen">Prüfen</button>'
+        ) +
+        '<p class="feedback" id="feedback"></p>' +
+        (gel ? bonusHtml(s) : '') + '<div class="trenner"></div>';
+    }
+
+    if (s.aufgabeTyp === "slider") {
+      var wert = sortZustand["slider" + i] != null ? sortZustand["slider" + i] : s.start;
+      return '<p class="aufgabe-label">Schätzfrage</p>' +
+        '<p class="aufgabe-frage">' + s.frage + '</p>' +
+        (gel
+          ? '<div class="slider-wert">' + s.ziel + ' ' + s.einheit + '</div>'
+          : '<div class="slider-wert" id="slider-anzeige">' + wert + ' ' + s.einheit + '</div>' +
+            '<input type="range" id="slider-input" min="' + s.min + '" max="' + s.max + '" value="' + wert + '">' +
+            '<button class="sekundaer" id="slider-pruefen">Prüfen</button>'
+        ) +
+        '<p class="feedback" id="feedback"></p>' +
+        (gel ? bonusHtml(s) : '') + '<div class="trenner"></div>';
+    }
+
+    if (s.aufgabeTyp === "sort") {
+      if (!sortZustand["sort" + i]) sortZustand["sort" + i] = shuffle(s.items.map(function(it) { return it.id; }));
+      var reihenfolge = sortZustand["sort" + i];
+      var itemsById = {};
+      s.items.forEach(function(it) { itemsById[it.id] = it.label; });
+      return '<p class="aufgabe-label">Reihenfolge</p>' +
+        '<p class="aufgabe-frage">' + s.frage + '</p>' +
+        '<div class="sort-liste" id="sort-liste">' +
+        reihenfolge.map(function(id, idx) {
+          return '<div class="sort-item" data-id="' + id + '"><span class="nr">' + (idx + 1) + '</span><span class="txt">' + escapeHtml(itemsById[id]) + '</span>' +
+            (gel ? '' : '<div class="pfeile"><button class="auf" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + '>▲</button><button class="ab" data-idx="' + idx + '"' + (idx === reihenfolge.length - 1 ? ' disabled' : '') + '>▼</button></div>') +
+            '</div>';
+        }).join("") +
+        '</div>' +
+        (gel ? '' : '<button class="sekundaer" id="sort-pruefen">Prüfen</button>') +
+        '<p class="feedback" id="feedback"></p>' +
+        (gel ? bonusHtml(s) : '') + '<div class="trenner"></div>';
+    }
+
+    if (s.aufgabeTyp === "mehrfach") {
+      var subStatus = sortZustand["mehrfach" + i] || {};
+      var textDraft = sortZustand["mehrfachEingabe" + i] || {};
+      var sliderDraft = sortZustand["mehrfachSlider" + i] || {};
+      return '<p class="aufgabe-label">' + (s.aufgabeLabel || "Entdecker-Quiz") + '</p>' +
+        s.fragen.map(function(f, fi) {
+          var subOk = !!subStatus[fi];
+          if (f.typ === "slider") {
+            var wert = sliderDraft[fi] != null ? sliderDraft[fi] : f.start;
+            return '<div class="mehrfach-item">' +
+              '<p class="mehrfach-frage">' + (fi + 1) + '. ' + f.frage + '</p>' +
+              (subOk
+                ? '<div class="mehrfach-richtig">✓ ' + f.ziel + ' ' + f.einheit + '</div>'
+                : '<div class="slider-wert" id="mehrfach-slider-anzeige-' + fi + '">' + wert + ' ' + f.einheit + '</div>' +
+                  '<input type="range" class="mehrfach-slider-input" data-fi="' + fi + '" min="' + f.min + '" max="' + f.max + '" value="' + wert + '">' +
+                  '<button class="sekundaer mehrfach-slider-pruefen" data-fi="' + fi + '">Prüfen</button>' +
+                  '<p class="feedback mehrfach-feedback" data-fi="' + fi + '"></p>'
+              ) +
+              '</div>';
+          }
+          return '<div class="mehrfach-item">' +
+            '<p class="mehrfach-frage">' + (fi + 1) + '. ' + f.frage + '</p>' +
+            (subOk
+              ? '<div class="mehrfach-richtig">✓ ' + escapeHtml(f.akzeptiert[0]) + '</div>'
+              : '<input type="text" class="mehrfach-eingabe" data-fi="' + fi + '" placeholder="' + escapeHtml(f.platzhalter || "Eure Antwort") + '" value="' + escapeHtml(textDraft[fi] || "") + '" autocomplete="off">' +
+                '<button class="sekundaer mehrfach-pruefen" data-fi="' + fi + '">Prüfen</button>' +
+                '<p class="feedback mehrfach-feedback" data-fi="' + fi + '"></p>'
+            ) +
+            '</div>';
+        }).join("") +
+        (gel ? bonusHtml(s) : '') + '<div class="trenner"></div>';
+    }
+    return "";
+  }
+
+  function bonusHtml(s) {
+    return '<div class="bonus-box"><b>Richtig</b>' + s.bonus +
+      (s.buchstabe ? '<span class="brief">Buchstabe für den Schatz-Code: ' + s.buchstabe + '</span>' : '') +
+      '</div>';
+  }
+
+  function renderHinweis(s, i) {
+    if (!s.hinweis) return "";
+    if (zustand.hinweisGenutzt[i]) {
+      return '<div class="hinweis-box"><b>💡 Hinweis</b>' + s.hinweis +
+        (s.hinweisBild ? '<img class="hinweis-bild" src="' + s.hinweisBild + '" alt="Skizze zum Hinweis" onerror="this.style.display=\'none\'">' : '') +
+        '<span class="hinweis-strafe">−3 Punkte wurden dafür abgezogen.</span></div>';
+    }
+    if (zustand.quizOk[i]) return "";
+    return '<button class="hinweis-btn" id="hinweis-btn">Hinweis anzeigen (−3 Punkte)</button>';
+  }
+
+  function bindeAufgabe(s, i) {
+    if (!s.aufgabeTyp || zustand.quizOk[i]) return;
+    var feedback = document.getElementById("feedback");
+
+    if (s.aufgabeTyp === "mc") {
+      app.querySelectorAll(".mc-option").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var idx = parseInt(btn.getAttribute("data-idx"), 10);
+          if (idx === s.richtig) { zustand.quizOk[i] = true; speichereZustand(); render(); }
+          else {
+            btn.classList.add("falsch");
+            feedback.textContent = "Noch nicht ganz, lest die Infos vor Ort nochmal und versucht's erneut.";
+            feedback.className = "feedback err";
+            setTimeout(function() { btn.classList.remove("falsch"); }, 900);
+          }
+        });
+      });
+    }
+
+    if (s.aufgabeTyp === "text") {
+      var eingabe = document.getElementById("text-eingabe");
+      var pruefen = document.getElementById("text-pruefen");
+      function check() {
+        var rohwert = eingabe.value.trim();
+        sortZustand["text" + i] = rohwert;
+        var ok;
+        if (s.mindestAnzahl) {
+          var teile = rohwert.split(/[,;\n]+/).map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t.length > 0; });
+          var praefix = (s.praefix || "").toLowerCase();
+          var treffer = teile.filter(function(t) { return t.indexOf(praefix) === 0; });
+          var eindeutig = treffer.filter(function(t, idx) { return treffer.indexOf(t) === idx; });
+          ok = eindeutig.length >= s.mindestAnzahl;
+        } else {
+          var wert = rohwert.toLowerCase().replace(/[\s-]/g, "");
+          ok = s.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; });
+        }
+        if (ok) { zustand.quizOk[i] = true; speichereZustand(); render(); }
+        else {
+          var wertNorm = rohwert.toLowerCase().replace(/[\s-]/g, "");
+          feedback.textContent = (!s.mindestAnzahl && istTippfehler(wertNorm, s.akzeptiert))
+            ? "Fast richtig – achte auf die Rechtschreibung."
+            : (s.fehlerHinweis || "Noch nicht richtig, versucht's nochmal.");
+          feedback.className = "feedback err";
+        }
+      }
+      pruefen.addEventListener("click", check);
+      eingabe.addEventListener("keydown", function(e) { if (e.key === "Enter") check(); });
+    }
+
+    if (s.aufgabeTyp === "slider") {
+      var slider = document.getElementById("slider-input");
+      var anzeige = document.getElementById("slider-anzeige");
+      slider.addEventListener("input", function() {
+        sortZustand["slider" + i] = parseInt(slider.value, 10);
+        anzeige.textContent = slider.value + " " + s.einheit;
+      });
+      document.getElementById("slider-pruefen").addEventListener("click", function() {
+        var wert = parseInt(slider.value, 10);
+        var diff = wert - s.ziel;
+        if (Math.abs(diff) <= s.toleranz) { zustand.quizOk[i] = true; speichereZustand(); render(); }
+        else {
+          feedback.textContent = diff > 0 ? "Zu hoch geschätzt, versucht's mit einer niedrigeren Zahl." : "Zu niedrig geschätzt, versucht's mit einer höheren Zahl.";
+          feedback.className = "feedback hinweis";
+        }
+      });
+    }
+
+    if (s.aufgabeTyp === "sort") {
+      var liste = document.getElementById("sort-liste");
+      function bewegen(idx, richtung) {
+        var arr = sortZustand["sort" + i];
+        var ziel = idx + richtung;
+        if (ziel < 0 || ziel >= arr.length) return;
+        var t = arr[idx]; arr[idx] = arr[ziel]; arr[ziel] = t;
+        render();
+      }
+      liste.querySelectorAll(".auf").forEach(function(btn) {
+        btn.addEventListener("click", function() { bewegen(parseInt(btn.getAttribute("data-idx"), 10), -1); });
+      });
+      liste.querySelectorAll(".ab").forEach(function(btn) {
+        btn.addEventListener("click", function() { bewegen(parseInt(btn.getAttribute("data-idx"), 10), 1); });
+      });
+      document.getElementById("sort-pruefen").addEventListener("click", function() {
+        var arr = sortZustand["sort" + i];
+        var ok = arr.length === s.richtigeReihenfolge.length && arr.every(function(id, idx) { return id === s.richtigeReihenfolge[idx]; });
+        if (ok) { zustand.quizOk[i] = true; speichereZustand(); render(); }
+        else { feedback.textContent = "Noch nicht die richtige Reihenfolge, denkt nochmal nach."; feedback.className = "feedback err"; }
+      });
+    }
+
+    if (s.aufgabeTyp === "mehrfach") {
+      if (!sortZustand["mehrfach" + i]) sortZustand["mehrfach" + i] = {};
+      var subStatus = sortZustand["mehrfach" + i];
+      if (!sortZustand["mehrfachEingabe" + i]) sortZustand["mehrfachEingabe" + i] = {};
+      var textDraft = sortZustand["mehrfachEingabe" + i];
+      if (!sortZustand["mehrfachSlider" + i]) sortZustand["mehrfachSlider" + i] = {};
+      var sliderDraft = sortZustand["mehrfachSlider" + i];
+      if (!zustand.sliderStrafen[i]) zustand.sliderStrafen[i] = {};
+
+      app.querySelectorAll(".mehrfach-eingabe").forEach(function(inp) {
+        var fi = parseInt(inp.getAttribute("data-fi"), 10);
+        inp.addEventListener("input", function() { textDraft[fi] = inp.value; });
+        inp.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") app.querySelector('.mehrfach-pruefen[data-fi="' + fi + '"]').click();
+        });
+      });
+      app.querySelectorAll(".mehrfach-pruefen").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var fi = parseInt(btn.getAttribute("data-fi"), 10);
+          var f = s.fragen[fi];
+          var eingabe = app.querySelector('.mehrfach-eingabe[data-fi="' + fi + '"]');
+          var wert = eingabe.value.trim().toLowerCase().replace(/[\s-]/g, "");
+          var ok = f.akzeptiert.some(function(a) { return a.replace(/[\s-]/g, "") === wert; });
+          if (ok) {
+            subStatus[fi] = true;
+            if (s.fragen.every(function(_, idx) { return subStatus[idx]; })) {
+              zustand.quizOk[i] = true;
+            }
+            speichereZustand();
+            render();
+          } else {
+            var fb = app.querySelector('.mehrfach-feedback[data-fi="' + fi + '"]');
+            fb.textContent = istTippfehler(wert, f.akzeptiert)
+              ? "Fast richtig – achte auf die Rechtschreibung."
+              : (f.fehlerHinweis || "Noch nicht richtig, schaut nochmal genau hin.");
+            fb.className = "feedback mehrfach-feedback err";
+          }
+        });
+      });
+
+      app.querySelectorAll(".mehrfach-slider-input").forEach(function(inp) {
+        var fi = parseInt(inp.getAttribute("data-fi"), 10);
+        inp.addEventListener("input", function() {
+          sliderDraft[fi] = parseInt(inp.value, 10);
+          var anzeige = document.getElementById("mehrfach-slider-anzeige-" + fi);
+          if (anzeige) anzeige.textContent = inp.value + " " + s.fragen[fi].einheit;
+        });
+      });
+      app.querySelectorAll(".mehrfach-slider-pruefen").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var fi = parseInt(btn.getAttribute("data-fi"), 10);
+          var f = s.fragen[fi];
+          var inp = app.querySelector('.mehrfach-slider-input[data-fi="' + fi + '"]');
+          var wert = parseInt(inp.value, 10);
+          var diff = wert - f.ziel;
+          var abweichung = Math.abs(diff);
+          var fb = app.querySelector('.mehrfach-feedback[data-fi="' + fi + '"]');
+          var neueStrafe = f.strafToleranz != null && abweichung > f.strafToleranz && !zustand.sliderStrafen[i][fi];
+          if (neueStrafe) zustand.sliderStrafen[i][fi] = true;
+          if (abweichung <= f.toleranz) {
+            subStatus[fi] = true;
+            if (s.fragen.every(function(_, idx) { return subStatus[idx]; })) {
+              zustand.quizOk[i] = true;
+            }
+            speichereZustand();
+            render();
+          } else {
+            fb.textContent = (diff > 0 ? "Zu hoch geschätzt." : "Zu niedrig geschätzt.") +
+              (f.strafToleranz != null && abweichung > f.strafToleranz ? " Das war mehr als " + f.strafToleranz + " " + f.einheit + " daneben (−1 Punkt)." : " Versucht's nochmal.");
+            fb.className = "feedback mehrfach-feedback hinweis";
+            speichereZustand();
+          }
+        });
+      });
+    }
+  }
+
+  function kickerText(pos) {
+    var txt = "Station " + (pos + 1);
+    if (pos === 0) txt += " · Start";
+    else if (pos === 6) txt += " · Innehalten";
+    else if (pos === 7) txt += " · Finale";
+    return txt;
+  }
+
+  function renderStation() {
+    var r = route();
+    var i = zustand.station;
+    var idx = r[i];
+    var s = STATIONEN[idx];
+    var still = !!s.still;
+
+    var kopf =
+      '<div class="spiel-kopf' + (still ? ' still' : '') + '"><span class="team">' + escapeHtml(zustand.teamname || "Euer Team") + '</span>' +
+      '<span class="rechts"><span class="timer" id="timer-anzeige">00:00</span><button class="ausstellen-btn" id="ausstellen-btn">Ausstellen</button></span></div>' +
+      '<div class="code-leiste"><span class="lbl">Code</span><span>' + (gesammelterCode(i) || "—") + '</span><span class="punkte-anzeige">★ ' + berechneBasisPunkte() + ' Punkte</span></div>';
+
+    var fortschritt = '<div class="fortschritt-zeile"><div class="fortschritt">' + r.map(function(_, posIdx) {
+      var cls = posIdx === i ? "aktiv" : (posIdx < i ? "erledigt" : "");
+      return '<div class="punkt ' + cls + '"></div>';
+    }).join("") + '</div>' +
+      '<button class="karte-btn" id="karte-btn" aria-label="Karte anzeigen" title="Karte anzeigen">🗺️</button></div>';
+
+    var kartenPos = KARTEN_POSITIONEN[idx] || { x: 50, y: 50 };
+    var kartenOverlay =
+      '<div class="karten-overlay" id="karten-overlay" hidden>' +
+        '<div class="karten-box">' +
+          '<button class="karten-schliessen" id="karten-schliessen">✕</button>' +
+          '<div class="karten-bild-wrap">' +
+            '<img class="karten-bild" src="bilder/karte.jpg" alt="Karte des Olympiaparks" onerror="this.style.display=\'none\'">' +
+            '<div class="karten-pin" style="left:' + kartenPos.x + '%;top:' + kartenPos.y + '%;"></div>' +
+          '</div>' +
+          '<p class="karten-hinweis">Das rote Licht blinkt an eurer aktuellen Station: ' + escapeHtml(s.titel) + '</p>' +
+        '</div>' +
+      '</div>';
+
+    var mapsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(s.maps);
+
+    var mehrfachFoto = (s.fotoAnzahl || 1) > 1;
+    var fotoHtml;
+    if (mehrfachFoto) {
+      var fotoArr = Array.isArray(zustand.fotos[idx]) ? zustand.fotos[idx] : new Array(s.fotoAnzahl).fill(null);
+      var erledigtAnzahl = fotoArr.filter(function(f) { return !!f; }).length;
+      fotoHtml =
+        '<p class="aufgabe-label">Beweisfotos</p>' +
+        '<p class="aufgabe-frage">' + s.foto + '</p>' +
+        '<div class="foto-reihe">' +
+        fotoArr.map(function(f, fIdx) {
+          var label = (s.fotoLabels && s.fotoLabels[fIdx]) || (fIdx + 1);
+          return '<div class="foto-slot' + (f ? ' hat-foto' : '') + '">' +
+            '<input type="file" accept="image/*" capture="environment" class="foto-slot-input" data-idx="' + fIdx + '">' +
+            (f ? '<img src="' + f + '" alt="">' : '<span class="foto-slot-label">' + escapeHtml(String(label)) + '</span>') +
+            '</div>';
+        }).join("") +
+        '</div>' +
+        '<p class="foto-reihe-hinweis">' + erledigtAnzahl + ' von ' + s.fotoAnzahl + ' Fotos aufgenommen. Tippt auf ein Feld, um dessen Foto aufzunehmen oder zu ersetzen.</p>';
+    } else {
+      var foto = zustand.fotos[idx];
+      fotoHtml =
+        '<p class="aufgabe-label">Beweisfoto</p>' +
+        '<p class="aufgabe-frage">' + s.foto + '</p>' +
+        '<div class="foto-bereich">' +
+        '<input type="file" accept="image/*" capture="environment" id="foto-input">' +
+        (foto
+          ? '<div class="foto-vorschau"><img src="' + foto + '" alt=""><span class="info">✓ Foto aufgenommen</span><button id="foto-ersetzen">Ersetzen</button></div>'
+          : '<button class="foto-btn" id="foto-btn">📷 Foto aufnehmen</button>'
+        ) +
+        '</div>';
+    }
+
+    app.innerHTML =
+      kopf + fortschritt + kartenOverlay +
+      '<button class="uebersicht-toggle" id="uebersicht-toggle">Alle Stationen anzeigen</button>' +
+      '<div id="uebersicht-wrap" hidden></div>' +
+      '<div class="karte' + (still ? ' still' : '') + '">' +
+        '<img class="station-bild" src="' + s.bild + '" alt="" onerror="this.style.display=\'none\'">' +
+        '<p class="station-kicker' + (still ? ' still' : '') + '">' + kickerText(i) + '</p>' +
+        '<h2 class="station-titel">' + s.titel + '</h2>' +
+        '<a class="maps-link" href="' + mapsUrl + '" target="_blank" rel="noopener">📍 In Google Maps öffnen</a>' +
+        '<p class="station-kontext">' + s.kontext + '</p>' +
+        (still ? '<p class="still-hinweis">' + s.stillHinweis + '</p>' : '') +
+        renderAufgabe(s, idx) + renderHinweis(s, idx) + fotoHtml +
+      '</div>' +
+      '<div class="weiter-zeile">' +
+        (i > 0 ? '<button class="zurueck" id="zurueck-btn">← Zurück</button>' : '') +
+        '<button class="primaer weiter" id="weiter-btn" ' + (pruefeFreischaltung(idx) ? '' : 'disabled') + '>' + (i === STATIONEN.length - 1 ? "Zum Schatz" : "Weiter") + '</button>' +
+        '<button class="ueberspringen-btn" id="ueberspringen-btn"><span>Station</span><span>überspringen</span></button>' +
+      '</div>';
+
+    startTimer();
+    bindeAufgabe(s, idx);
+
+    document.getElementById("karte-btn").addEventListener("click", function() {
+      document.getElementById("karten-overlay").hidden = false;
+    });
+    document.getElementById("karten-schliessen").addEventListener("click", function() {
+      document.getElementById("karten-overlay").hidden = true;
+    });
+
+    document.getElementById("uebersicht-toggle").addEventListener("click", function() {
+      var wrap = document.getElementById("uebersicht-wrap");
+      if (wrap.hidden) {
+        wrap.innerHTML = '<ul class="uebersicht-liste">' + r.map(function(globalIdx, posIdx) {
+          var st = STATIONEN[globalIdx];
+          var fertig = posIdx < i;
+          return '<li class="' + (fertig ? 'fertig' : '') + '"><span class="nr">' + (posIdx + 1) + '</span>' + (fertig ? "✓ " : "") + st.titel + '</li>';
+        }).join("") + '</ul>';
+        wrap.hidden = false;
+      } else {
+        wrap.hidden = true;
+      }
+    });
+
+    if (mehrfachFoto) {
+      app.querySelectorAll(".foto-slot-input").forEach(function(inp) {
+        inp.addEventListener("change", function(e) {
+          var fotoSlotIdx = parseInt(inp.getAttribute("data-idx"), 10);
+          var file = e.target.files && e.target.files[0];
+          if (!file) return;
+          verkleinereFoto(file, function(dataUrl) {
+            if (!Array.isArray(zustand.fotos[idx])) zustand.fotos[idx] = new Array(s.fotoAnzahl).fill(null);
+            zustand.fotos[idx][fotoSlotIdx] = dataUrl;
+            speichereZustand();
+            render();
+          });
+        });
+      });
+    } else {
+      var fotoInput = document.getElementById("foto-input");
+      function fotoUebernehmen(file) {
+        if (!file) return;
+        verkleinereFoto(file, function(dataUrl) {
+          zustand.fotos[idx] = dataUrl;
+          speichereZustand();
+          render();
+        });
+      }
+      fotoInput.addEventListener("change", function(e) { fotoUebernehmen(e.target.files && e.target.files[0]); });
+      var fotoBtn = document.getElementById("foto-btn");
+      if (fotoBtn) fotoBtn.addEventListener("click", function() { fotoInput.click(); });
+      var fotoErsetzen = document.getElementById("foto-ersetzen");
+      if (fotoErsetzen) fotoErsetzen.addEventListener("click", function() { fotoInput.click(); });
+    }
+
+    var weiterBtn = document.getElementById("weiter-btn");
+    weiterBtn.addEventListener("click", function() {
+      if (i === STATIONEN.length - 1) { zustand.ende = Date.now(); }
+      else { zustand.station = i + 1; }
+      speichereZustand();
+      render();
+      scrollSeiteNachOben();
+    });
+
+    var zurueckBtn = document.getElementById("zurueck-btn");
+    if (zurueckBtn) {
+      zurueckBtn.addEventListener("click", function() { zustand.station = i - 1; speichereZustand(); render(); });
+    }
+
+    var ueberspringenBtn = document.getElementById("ueberspringen-btn");
+    if (ueberspringenBtn) {
+      var uebersprungBestaetigen = false;
+      ueberspringenBtn.addEventListener("click", function() {
+        if (!uebersprungBestaetigen) {
+          uebersprungBestaetigen = true;
+          ueberspringenBtn.textContent = "Sicher? Kostet 10 Punkte – nochmal tippen";
+          setTimeout(function() {
+            uebersprungBestaetigen = false;
+            ueberspringenBtn.textContent = "Station überspringen";
+          }, 3000);
+          return;
+        }
+        if (!zustand.uebersprungen[idx]) zustand.uebersprungen[idx] = true;
+        if (i === STATIONEN.length - 1) { zustand.ende = Date.now(); }
+        else { zustand.station = i + 1; }
+        speichereZustand();
+        render();
+        scrollSeiteNachOben();
+      });
+    }
+
+    var hinweisBtn = document.getElementById("hinweis-btn");
+    if (hinweisBtn) {
+      var hinweisBestaetigen = false;
+      hinweisBtn.addEventListener("click", function() {
+        if (!hinweisBestaetigen) {
+          hinweisBestaetigen = true;
+          hinweisBtn.textContent = "Sicher? Kostet 3 Punkte – nochmal tippen";
+          setTimeout(function() {
+            hinweisBestaetigen = false;
+            hinweisBtn.textContent = "Hinweis anzeigen (−3 Punkte)";
+          }, 3000);
+          return;
+        }
+        zustand.hinweisGenutzt[idx] = true;
+        speichereZustand();
+        render();
+      });
+    }
+
+    var ausstellenBtn = document.getElementById("ausstellen-btn");
+    var ausstellenBestaetigen = false;
+    ausstellenBtn.addEventListener("click", function() {
+      if (!ausstellenBestaetigen) {
+        ausstellenBestaetigen = true;
+        ausstellenBtn.textContent = "Wirklich beenden?";
+        setTimeout(function() { ausstellenBestaetigen = false; ausstellenBtn.textContent = "Ausstellen"; }, 3000);
+        return;
+      }
+      zustand.ende = Date.now();
+      speichereZustand();
+      render();
+    });
+  }
+
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    function tick() {
+      var el = document.getElementById("timer-anzeige");
+      if (!el) return;
+      var rest = SPIELZEIT_MS - (Date.now() - zustand.start);
+      if (rest >= 0) {
+        el.textContent = formatZeit(rest);
+        el.classList.remove("ueberzeit");
+      } else {
+        el.textContent = "−" + formatZeit(-rest);
+        el.classList.add("ueberzeit");
+      }
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  function renderFinale() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    var dauer = zustand.ende - zustand.start;
+    var fotos = [];
+    zustand.fotos.forEach(function(f) {
+      if (Array.isArray(f)) { f.forEach(function(x) { if (x) fotos.push(x); }); }
+      else if (f) { fotos.push(f); }
+    });
+    var code = gesammelterCode();
+    var stationenGeloest = zustand.quizOk.filter(function(q) { return q; }).length;
+    var fotosErledigt = STATIONEN.filter(function(s, idx) { return fotoIstVollstaendig(s, idx); }).length;
+    var hinweiseGenutzt = zustand.hinweisGenutzt.filter(function(h) { return h; }).length;
+    var uebersprungenAnzahl = (zustand.uebersprungen || []).filter(function(u) { return u; }).length;
+    var verspaetungMin = berechneVerspaetungMinuten();
+    var verspaetungStrafe = berechneVerspaetungsstrafe();
+    var gesamtPunkte = berechnePunkte();
+    app.innerHTML =
+      '<img class="finale-bild" src="bilder/schatz.jpg" alt="" onerror="this.style.display=\'none\'">' +
+      '<div class="text-karte"><h1 class="intro-titel" style="text-align:center;">Geschafft!</h1>' +
+      '<p class="finale-zeit">' + gesamtPunkte + '</p>' +
+      '<p class="finale-label">PUNKTE INSGESAMT</p></div>' +
+      '<div class="punkte-breakdown">' +
+        '<div class="punkte-zeile"><span>' + stationenGeloest + ' von ' + STATIONEN.length + ' Stationen gelöst</span><span>+' + (stationenGeloest * 10) + '</span></div>' +
+        '<div class="punkte-zeile"><span>' + fotosErledigt + ' Beweisfotos</span><span>+' + (fotosErledigt * 5) + '</span></div>' +
+        (hinweiseGenutzt ? '<div class="punkte-zeile"><span>' + hinweiseGenutzt + ' Hinweis(e) genutzt</span><span>−' + (hinweiseGenutzt * 3) + '</span></div>' : '') +
+        (uebersprungenAnzahl ? '<div class="punkte-zeile"><span>' + uebersprungenAnzahl + ' Station(en) übersprungen</span><span>−' + (uebersprungenAnzahl * 10) + '</span></div>' : '') +
+        (verspaetungStrafe ? '<div class="punkte-zeile"><span>Verspätung (' + verspaetungMin + ' Min.)</span><span>−' + verspaetungStrafe + '</span></div>' : '') +
+        '<p class="finale-zeit-klein">Eure Zeit: ' + formatZeit(dauer) + ' · Ziel waren 120:00</p>' +
+      '</div>' +
+      '<div class="schatz-box">' +
+        '<p class="kicker">Schatz-Code</p>' +
+        '<p class="schatz-code">' + code + '</p>' +
+        '<p class="hinweis">Zeigt diesen Code und eure Beweisfotos eurer Lehrkraft am <b>Café Coubertin</b> (Hans-Jochen-Vogel-Platz), um euren Schatz einzulösen.</p>' +
+      '</div>' +
+      (fotos.length ?
+        '<p class="fotostrecke-label">Eure Fotos – nur auf diesem Handy gespeichert, nirgendwo hochgeladen. Foto gedrückt halten und „Zu Fotos hinzufügen“ bzw. „Bild speichern“ wählen, um es in eurer eigenen Galerie zu sichern.</p>' +
+        '<div class="fotostrecke">' + fotos.map(function(f) { return '<img src="' + f + '" alt="">'; }).join("") + '</div>'
+      : "") +
+      '<div class="team-liste-finale"><b>' + escapeHtml(zustand.teamname) + '</b><br>' + escapeHtml(zustand.namen) + '</div>' +
+      '<button class="text-link" id="neustart-btn">Neue Runde starten</button>';
+
+    var neustartBtn = document.getElementById("neustart-btn");
+    var bestaetigen = false;
+    neustartBtn.addEventListener("click", function() {
+      if (!bestaetigen) {
+        bestaetigen = true;
+        neustartBtn.textContent = "Wirklich alles löschen? Nochmal tippen";
+        setTimeout(function() { bestaetigen = false; neustartBtn.textContent = "Neue Runde starten"; }, 3000);
+        return;
+      }
+      zustand = { teamname: "", namen: "", regelnAkzeptiert: false, startNummer: null, start: null, ende: null, station: 0, quizOk: [], fotos: [], hinweisGenutzt: [], sliderStrafen: [], uebersprungen: [] };
+      sortZustand = {};
+      speichereZustand();
+      render();
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  if (LEHRKRAFT_MODUS) { renderLehrkraftPasswort(); } else { render(); }
+})();
+</script>
+
+</body></html>
